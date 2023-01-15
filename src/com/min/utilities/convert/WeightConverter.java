@@ -2,26 +2,25 @@ package com.min.utilities.convert;
 
 import java.util.Arrays;
 
-public class LengthConverter extends AbstractConverter {
+public class WeightConverter extends AbstractConverter {
 
-	private final String[] LENGTH_UNIT_LIST = { "Nanometers", "Microns", "Millimeters", "Centimeters", "Meters",
-			"Kilometers", "Inches", "Feet", "Yards", "Miles", "Nautical miles" };
-	private final double[] CONVERSION_RATE_IN_ORDER = {0.001, 0.001, 0.1, 0.01, 0.001, 1e5 / 2.54, 1.0/12.0, 1.0/3.0, 1.0/1760.0, 1.0/1.15078};
+	private final String[] WEIGHT_UNIT_LIST = { "Carats", "Milligrams", "Centigrams", "Decigrams", "Grams",
+			"Decagrams", "Hectograms", "Kilograms", "Metric tonnes", "Ounces", "pounds", "Stones", "Short tons(US)", "Long tons(UK)"};
+	private final double[] CONVERSION_RATE_IN_ORDER = {200, 0.1, 0.1, 0.1, 0.1, 0.1,
+			0.1, 0.001, 35273.96, 0.0625, 0.071429, 0.007, 0.892857};
 	
-	
-	public String[] getLENGTH_UNIT_LIST() {
-		return LENGTH_UNIT_LIST;
+	public String[] getWEIGHT_UNIT_LIST() {
+		return WEIGHT_UNIT_LIST;
 	}
 
 	public double[] getCONVERSION_RATE_IN_ORDER() {
 		return CONVERSION_RATE_IN_ORDER;
 	}
-
+	
 	@Override
 	public String convertUnits(String fromUnit, String toUnit, String fromUnitValue) throws NumberFormatException {
-		
-		int indexofFromUnit = Arrays.asList(this.LENGTH_UNIT_LIST).indexOf(fromUnit);
-		int indexoftoUnit = Arrays.asList(this.LENGTH_UNIT_LIST).indexOf(toUnit);
+		int indexofFromUnit = Arrays.asList(this.WEIGHT_UNIT_LIST).indexOf(fromUnit);
+		int indexoftoUnit = Arrays.asList(this.WEIGHT_UNIT_LIST).indexOf(toUnit);
 		double finalRate = 1.0;
 		double dblValue = Double.parseDouble(fromUnitValue);
 		if(indexofFromUnit < indexoftoUnit) {
@@ -40,6 +39,5 @@ public class LengthConverter extends AbstractConverter {
 		toUnitValue = dblValue * finalRate;
 		return String.format("%.6f", toUnitValue);
 	}
-
 
 }

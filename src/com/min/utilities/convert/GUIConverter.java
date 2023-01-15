@@ -1,74 +1,75 @@
 package com.min.utilities.convert;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 public class GUIConverter extends JFrame {
-
+	
+	/**
+	 * fields declaration
+	 */
 	private static final long serialVersionUID = 1L;
-	private JComboBox<String> typeList = new JComboBox<String>(new String[] { "Length", "Temperature" });
+	private JComboBox<String> typeList = new JComboBox<String>(new String[] { "Length", "Temperature" ,"Weight" });
 	private FactoryConverter fC = new FactoryConverter();
-	private AbstractConverter aC;
-	JButton[] buttonArray = new JButton[13];
-	JLabel placeHolder1 = new JLabel();
-	JLabel placeHolder2 = new JLabel();
+	private AbstractConverter aC = null;
+	private LengthConverter lC = null;
+	private TemperatureConverter tC = null;
+	private WeightConverter wC = null;
+	JButton[] buttonArray = null;
+	JLabel placeHolder1 = null;
+	JLabel placeHolder2 = null;
+	JLabel headerLabel = null;
+	JLabel fromUnitValue = null;
+	JLabel toUnitValue = null;
+	JPanel contentPanel = null;
+	JPanel headerPanel = null;
+	JPanel displayPanel = null;
+	JPanel buttonPanel = null;
+	JPanel footerPanel = null;
+	JComboBox<String> jcbFromList = null;
+	JComboBox<String> jcbToList = null;
 
+	
 	public GUIConverter(String[] unitList) {
 
-		initConverterInstance(typeList.getSelectedItem().toString());
-
-		setTitle("Min's Calculator");
-		setSize(600, 600);
-		setResizable(false);
-
-		JPanel contentPanel = new JPanel();
-		JPanel headerPanel = new JPanel();
-		JPanel displayPanel = new JPanel();
-		JPanel buttonPanel = new JPanel();
-		JPanel footerPanel = new JPanel();
+		aC = fC.createConverter(typeList.getSelectedItem().toString());
+		initJComponents();
+		
+		setTitle("Min's Converter");
+		setSize(700, 600);
+		//setResizable(false);
 
 		headerPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		headerPanel.setPreferredSize(new Dimension(600, 50));
-		displayPanel.setPreferredSize(new Dimension(250, 500));
+		buttonPanel.setPreferredSize(new Dimension(350, 500));
 		footerPanel.setPreferredSize(new Dimension(600, 50));
 
 		add(contentPanel);
 		contentPanel.setLayout(new BorderLayout(10, 5));
 		contentPanel.add(headerPanel, BorderLayout.NORTH);
-		contentPanel.add(displayPanel, BorderLayout.WEST);
-		contentPanel.add(buttonPanel, BorderLayout.CENTER);
+		contentPanel.add(displayPanel, BorderLayout.CENTER);
+		contentPanel.add(buttonPanel, BorderLayout.EAST);
 		contentPanel.add(footerPanel, BorderLayout.SOUTH);
 		typeList.setPreferredSize(new Dimension(120, 30));
-		JLabel headerLabel = new JLabel("Converter");
+		
 		headerLabel.setFont(new Font("San-seif", Font.BOLD, 20));
 		headerPanel.add(typeList);
 		headerPanel.add(headerLabel);
-
-		JComboBox<String> jcbFromList = new JComboBox<String>();
+		
 		jcbFromList.setModel(new DefaultComboBoxModel<String>(unitList));
 		jcbFromList.setSize(150, 20);
-		JLabel fromUnitValue = new JLabel("0", SwingConstants.LEFT);
 		fromUnitValue.setFont(new Font("San-seif", Font.BOLD, 50));
 		fromUnitValue.setPreferredSize(new Dimension(150, 200));
 
-		JComboBox<String> jcbToList = new JComboBox<String>();
 		jcbToList.setModel(new DefaultComboBoxModel<String>(unitList));
 		jcbToList.setPreferredSize(new Dimension(150, 20));
-		JLabel toUnitValue = new JLabel("0", SwingConstants.LEFT);
 		toUnitValue.setFont(new Font("San-seif", Font.BOLD, 50));
 		toUnitValue.setPreferredSize(new Dimension(150, 200));
 
@@ -77,7 +78,44 @@ public class GUIConverter extends JFrame {
 		displayPanel.add(jcbFromList);
 		displayPanel.add(toUnitValue);
 		displayPanel.add(jcbToList);
+		setDefaultFromToUnitPairOnLoad();
 
+		for (JButton ea : buttonArray) {
+			ea.setFont(new Font("San-seif", Font.PLAIN, 20));
+		}
+		buttonPanel.setLayout(new GridLayout(5, 3, 1, 1));
+		buttonPanel.add(placeHolder1);
+		for (int i = 0; i <= 10; i++) {
+			buttonPanel.add(buttonArray[i]);
+		}
+		buttonPanel.add(placeHolder2);
+		buttonPanel.add(buttonArray[11]);
+		buttonPanel.add(buttonArray[12]);
+
+		setVisible(true);
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		
+		createEventHandlers();
+	}
+	
+	public void initJComponents() {
+		buttonArray = new JButton[13];
+		placeHolder1 = new JLabel();
+		placeHolder2 = new JLabel();
+		contentPanel = new JPanel();
+		headerPanel = new JPanel();
+		displayPanel = new JPanel();
+		buttonPanel = new JPanel();
+		footerPanel = new JPanel();
+		
+		headerLabel = new JLabel("Converter");
+		
+		jcbFromList = new JComboBox<String>();
+		fromUnitValue = new JLabel("0", SwingConstants.LEFT);
+		
+		jcbToList = new JComboBox<String>();
+		toUnitValue = new JLabel("0", SwingConstants.LEFT);
+		
 		buttonArray[0] = new JButton("CE");
 		buttonArray[1] = new JButton("BS");
 		buttonArray[2] = new JButton("7");
@@ -91,22 +129,29 @@ public class GUIConverter extends JFrame {
 		buttonArray[10] = new JButton("3");
 		buttonArray[11] = new JButton("0");
 		buttonArray[12] = new JButton(".");
-		for (JButton ea : buttonArray) {
-			ea.setFont(new Font("San-seif", Font.PLAIN, 20));
+	}
+	
+	
+	public void setDefaultFromToUnitPairOnLoad() {
+		String currentInstanceName = aC.getClass().getSimpleName();
+		switch(currentInstanceName) {
+		case "LengthConverter":
+			jcbFromList.setSelectedIndex(6); //set to Inches unit
+			jcbToList.setSelectedIndex(3); //set to Centimeters unit
+		    break;
+		case "TemperatureConverter":
+			jcbFromList.setSelectedIndex(0); //set to Celcius
+			jcbToList.setSelectedIndex(1); //set to Fahrenheit
+		    break;
+		case "WeightConverter":
+			jcbFromList.setSelectedIndex(7); //set to Kilograms unit
+			jcbToList.setSelectedIndex(10); //set to Pounds unit
+		    break;
 		}
-
-		buttonPanel.setLayout(new GridLayout(5, 3, 1, 1));
-		buttonPanel.add(placeHolder1);
-		for (int i = 0; i <= 10; i++) {
-			buttonPanel.add(buttonArray[i]);
-		}
-		buttonPanel.add(placeHolder2);
-		buttonPanel.add(buttonArray[11]);
-		buttonPanel.add(buttonArray[12]);
-
-		setVisible(true);
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
-
+	}
+	
+	
+	public void createEventHandlers() {
 		for (int i = 2; i <= 11; i++) {
 			JButton element = buttonArray[i];
 			element.addActionListener(e -> {
@@ -141,55 +186,52 @@ public class GUIConverter extends JFrame {
 		});
 
 		typeList.addItemListener(e -> {
-			aC = fC.createConverter(typeList.getSelectedItem().toString());
 			switch (typeList.getSelectedItem().toString()) {
 			case "Length":
-				aC = (LengthConverter) fC.createConverter(typeList.getSelectedItem().toString());
+				lC = (LengthConverter) fC.createConverter(typeList.getSelectedItem().toString());
+				jcbFromList.setModel(new DefaultComboBoxModel<String>(lC.getLENGTH_UNIT_LIST()));
+				jcbToList.setModel(new DefaultComboBoxModel<String>(lC.getLENGTH_UNIT_LIST()));
 				break;
+			case "Temperature":
+				tC = (TemperatureConverter) fC.createConverter(typeList.getSelectedItem().toString());
+				jcbFromList.setModel(new DefaultComboBoxModel<String>(tC.getTEMPERATURE_UNIT_LIST()));
+				jcbToList.setModel(new DefaultComboBoxModel<String>(tC.getTEMPERATURE_UNIT_LIST()));
+				break;
+			case "Weight":
+				wC = (WeightConverter) fC.createConverter(typeList.getSelectedItem().toString());
+				jcbFromList.setModel(new DefaultComboBoxModel<String>(wC.getWEIGHT_UNIT_LIST()));
+				jcbToList.setModel(new DefaultComboBoxModel<String>(wC.getWEIGHT_UNIT_LIST()));
+				break;
+			default:
+				throw new IllegalArgumentException("No such converter exists");
 			}
+			aC = fC.createConverter(typeList.getSelectedItem().toString());
+			setDefaultFromToUnitPairOnLoad();
+		});
+		
+		jcbFromList.addItemListener(e -> {
+			evaluate();
+		});
+		
+		jcbToList.addItemListener(e -> {
+			evaluate();
 		});
 
 		fromUnitValue.addPropertyChangeListener(new PropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
-				Double result = aC.convertUnits(jcbFromList.getSelectedItem().toString(),
-						jcbToList.getSelectedItem().toString(), fromUnitValue.getText());
-				toUnitValue.setText(result.toString());
-
+				evaluate();
 			}
 		});
 	}
-
-	/*
-	 * fromUnitValue.getDocument().addDocumentListener(new DocumentListener() {
-	 * 
-	 * @Override public void insertUpdate(DocumentEvent e) { evaluateValue();
-	 * System.out.println(fromUnitValue.getText()); }
-	 * 
-	 * @Override public void removeUpdate(DocumentEvent e) { evaluateValue();
-	 * //System.out.println(fromValue);
-	 * 
-	 * }
-	 * 
-	 * @Override public void changedUpdate(DocumentEvent e) { evaluateValue();
-	 * //System.out.println(fromValue); }
-	 * 
-	 * public void evaluateValue() { Double result =
-	 * aC.convertUnits(jcbFromList.getSelectedItem().toString(),
-	 * jcbToList.getSelectedItem().toString(), fromUnitValue.getText());
-	 * toUnitValue.setText(result.toString()); }
-	 * 
-	 * });
-	 */
-
-	/**
-	 * 
-	 * @param type
-	 */
-	public void initConverterInstance(String type) {
-		switch (type) {
-		case "Length":
-			aC = fC.createConverter(typeList.getSelectedItem().toString());
+	
+	public void evaluate() {
+		try {
+			String result = aC.convertUnits(jcbFromList.getSelectedItem().toString(),
+					jcbToList.getSelectedItem().toString(), fromUnitValue.getText());
+			toUnitValue.setText(result);
+		} catch (Exception e) {
+			toUnitValue.setText("Error");
 		}
 	}
 }

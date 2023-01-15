@@ -11,7 +11,6 @@ public class TestConverter {
 			public void run() {
 				FactoryConverter myFC = new FactoryConverter();
 				LengthConverter myLC = (LengthConverter) myFC.createConverter("Length");
-
 				new GUIConverter(myLC.getLENGTH_UNIT_LIST());
 			}
 		});

@@ -23,5 +23,5 @@ public abstract class AbstractConverter {
 		this.toUnitValue = toUnitValue;
 	}
 
-	public abstract double convertUnits(String fromUnit, String toUnit, String fromUnitValue);
+	public abstract String convertUnits(String fromUnit, String toUnit, String fromUnitValue);
 }

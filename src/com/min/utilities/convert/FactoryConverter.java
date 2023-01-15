@@ -9,8 +9,10 @@ public class FactoryConverter {
 		switch (converterType) {
 		case "Length": 
 			return  new LengthConverter();
+		case "Temperature":
+			return  new TemperatureConverter();
 		case "Weight":
-			//return new WeightConverter();
+			return  new WeightConverter();
 		default:
 			throw new IllegalArgumentException("Unknown converter type" + converterType);
 			
